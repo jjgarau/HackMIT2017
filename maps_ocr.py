@@ -7,8 +7,10 @@ from skimage import feature as f
 from skimage import morphology as morph
 from skimage.transform import hough_line, hough_line_peaks
 
+from rect_Kmeans import *
+
 base_uri = r'/Users/miguelperezsanchis/Downloads/hackMIT/png_maps'
-img_path = os.path.join(base_uri, '4_2_cut.png')
+img_path = os.path.join(base_uri, '1_0_cut.png')
 
 img = Image.open(img_path).convert('L')
 
@@ -43,17 +45,33 @@ h, theta, d = hough_line(pix, theta=np.linspace(start=-np.pi/2., stop=np.pi/2, n
 
 print(h.shape, theta.shape, d.shape)
 
-# plt.hist(out.flatten())
-# mpld3.show(open_browser=False, ip='0.0.0.0', port=8000)
+h, angles, dists = hough_line_peaks(h, theta, d, min_distance=20, num_peaks=12, threshold=0.5*h.max())
 
-# lines = np.argwhere(h > 800.)
+clust_v, clust_h, xs, ys, cost = find_best_Kmeans(angles, dists, pix.shape)
+
+corners = [(y, x) for y in clust_h for x in clust_v]
+
+
+
+print('KMEANS')
+print(clust_v)
+print(clust_h)
+print(xs)
+print(ys)
+print(cost)
 
 fig, ax = plt.subplots()
 
-for _, angle, dist in zip(*hough_line_peaks(h, theta, d, min_distance=20, num_peaks=12, threshold=0.3*h.max())):
+for _, angle, dist in zip(h, angles, dists):
     y0 = (dist - 0 * np.cos(angle)) / (np.sin(angle) + 0.0001)
     y1 = (dist - pix.shape[1] * np.cos(angle)) / (np.sin(angle) + 0.001)
     ax.plot((0, pix.shape[1]), (y0, y1), '-r')
+
+for x in xs:
+    ax.plot((x, x), (0, pix.shape[0]), '-b')
+for y in ys:
+    ax.plot((0, pix.shape[1]), (y,y), '-b')
+
 ax.set_xlim((0, pix.shape[1]))
 ax.set_ylim((pix.shape[0], 0))
 ax.set_axis_off()
