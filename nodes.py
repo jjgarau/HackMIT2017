@@ -13,10 +13,14 @@ from sklearn.cluster import KMeans
 
 class NodeSet():
 
-    def __init__(self, file):
+    def __init__(self, file, nodes=True, n_ext=None):
         self.map_ = self.get_map(file)
-        self.p_nodes = self.get_pnodes()
-        self.nodes = self.get_nodes()
+        if nodes:
+            self.p_nodes = self.get_pnodes()
+            self.nodes = self.get_nodes()
+        else:
+            self.p_nodes = None
+            self.nodes = n_ext
 
     def get_map(self, file):
         img = Image.open(file).convert('L')
@@ -52,8 +56,8 @@ class NodeSet():
     def get_nodes(self):
         inertias = []
         inertias_d = []
-        n_c_min = 10
-        n_c_max = 70
+        n_c_min = 25
+        n_c_max = 32
         for i in range(n_c_min, n_c_max):
             print('Clustering...' + str(i-n_c_min+1) + '/' + str(n_c_max-n_c_min))
             kmeans = KMeans(n_clusters=i).fit(np.array(self.p_nodes))
