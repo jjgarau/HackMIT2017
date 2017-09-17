@@ -64,9 +64,3 @@ class NodeSet():
         print("Optimal Cluster Quantity: " + str(n_c_o))
         kmeans = KMeans(n_clusters=n_c_o).fit(np.array(self.p_nodes))
         return kmeans.cluster_centers_
-
-if __name__ == "__main__":
-    file = '/Users/juanjogarau/Documents/MIT/HackMIT2017/png_maps/1_1.png'
-    ns = NodeSet(file)
-    plt.figure()
-    plt.imshow(ns.map_)
