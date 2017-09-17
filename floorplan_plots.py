@@ -4,7 +4,6 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from scipy.misc import imread                   # Cargo imread de scipy.misc
 import matplotlib.mlab as mlab
 from PIL import Image
 import graph
