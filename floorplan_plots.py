@@ -77,7 +77,7 @@ sizey = imagen_superficial.size[1]
 xfactor = 78.5
 yfactor = 79.6
 meansize = (sizex+sizey)/2
-mufactor = 2000
+mufactor = 400
 
 x = np.arange(-sizex/xfactor, sizex/xfactor, delta)
 y = np.arange(-sizey/yfactor, sizey/yfactor, delta)
