@@ -72,11 +72,18 @@ matplotlib.rcParams['ytick.direction'] = 'out'
 delta = 0.025
 sizex = imagen_superficial.size[0]
 sizey = imagen_superficial.size[1]
+
+# Factors
 xfactor = 78.5
-x = np.arange(-3.9, 3.9, delta)
-y = np.arange(-4.7, 4.7, delta)
+yfactor = 79.6
+meansize = (sizex+sizey)/2
+mufactor = 2000
+
+x = np.arange(-sizex/xfactor, sizex/xfactor, delta)
+y = np.arange(-sizey/yfactor, sizey/yfactor, delta)
 X, Y = np.meshgrid(x, y)
-Z1 = mlab.bivariate_normal(X, Y, 0.1, 0.1, 0, 0)
+
+Z1 = mlab.bivariate_normal(X, Y, meansize/mufactor, meansize/mufactor, 0, 0)
 
 
 plt.imshow(Z1, alpha=0.7, cmap='YlOrBr')
