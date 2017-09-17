@@ -1,7 +1,8 @@
 from flask import Flask
 from flask import request
 from flask import render_template
-import test
+#import test
+import os
 
 app = Flask(__name__)
 
@@ -13,7 +14,7 @@ def my_form():
 def my_form_post():
     to = request.form['to']
     # use "to"    
-    test.exec(to)
+    os.system('python test.py '+to)
     return render_template("result.html")
 
 if __name__ == '__main__':
