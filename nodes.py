@@ -10,14 +10,27 @@ from skimage.morphology import dilation, opening
 from skimage.measure import regionprops
 from sklearn.cluster import KMeans
 
+import pickle
+
+
+def save_nodes(nodes, filepath):
+    with open(filepath, 'wb') as f:
+        pickle.dump(nodes, f)
+
+def load_nodes(filepath):
+    with open(filepath, 'rb') as f:
+        obj = pickle.load(f)
+    return obj
 
 class NodeSet():
 
-    def __init__(self, file, nodes=True, n_ext=None):
+    def __init__(self, file, filepath=None, nodes=True, n_ext=None):
         self.map_ = self.get_map(file)
         if nodes:
             self.p_nodes = self.get_pnodes()
             self.nodes = self.get_nodes()
+            if filepath:
+                save_nodes(self.nodes, filepath)
         else:
             self.p_nodes = None
             self.nodes = n_ext
