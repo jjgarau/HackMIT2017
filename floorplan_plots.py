@@ -4,8 +4,9 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from scipy.misc import imread                   # Cargo imread de scipy.misc
+#from scipy.misc import imread                   # Cargo imread de scipy.misc
 import matplotlib.mlab as mlab
+from PIL import Image
 
 ###########################################################################
 # DATA
@@ -22,7 +23,7 @@ nodos_opt = [0,1,3]
 ###########################################################################
 # PLOT FONDO (MAPA)
 ###########################################################################
-imagen_superficial = imread('33_4b.png')
+imagen_superficial = Image.open('33_4b.png')
 # Creo una figura
 plt.figure()
 # Muestro la imagen en pantalla
