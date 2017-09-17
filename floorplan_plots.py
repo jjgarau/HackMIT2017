@@ -30,23 +30,6 @@ plt.figure()
 plt.imshow(imagen_superficial)
 
 ###########################################################################
-# PLOT HOTSPOTS
-###########################################################################
-matplotlib.rcParams['xtick.direction'] = 'out'
-matplotlib.rcParams['ytick.direction'] = 'out'
-
-delta = 0.025
-x = np.arange(-3.0, 3.0, delta)
-y = np.arange(-2.0, 2.0, delta)
-X, Y = np.meshgrid(x, y)
-Z1 = mlab.bivariate_normal(X, Y, 1.0, 1.0, 0.0, 0.0)
-
-#plt.imshow(aux)
-#aux = np.random.rand(Z1.shape[0],Z1.shape[1])
-
-plt.imshow(Z1, alpha=0.7, cmap='YlOrBr')
-
-###########################################################################
 # PLOT GRAFO
 ###########################################################################
 N = len(nodos_conec) # Numero total de nodos
@@ -78,4 +61,24 @@ plt.axis('equal')  #<-- set the axes to the same scale
 #plt.xlim([-1,5]) #<-- set the x axis limits
 #plt.ylim([-1,5]) #<-- set the y axis limits
 plt.grid(b=True, which='major') #<-- plot grid lines
+
+
+###########################################################################
+# PLOT HOTSPOTS
+###########################################################################
+matplotlib.rcParams['xtick.direction'] = 'out'
+matplotlib.rcParams['ytick.direction'] = 'out'
+
+delta = 0.025
+sizex = imagen_superficial.size[0]
+sizey = imagen_superficial.size[1]
+xfactor = 78.5
+x = np.arange(-3.9, 3.9, delta)
+y = np.arange(-4.7, 4.7, delta)
+X, Y = np.meshgrid(x, y)
+Z1 = mlab.bivariate_normal(X, Y, 0.1, 0.1, 0, 0)
+
+
+plt.imshow(Z1, alpha=0.7, cmap='YlOrBr')
+
 plt.show()
