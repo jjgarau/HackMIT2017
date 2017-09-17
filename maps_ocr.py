@@ -3,7 +3,7 @@ import numpy as np
 import mpld3
 import matplotlib.pyplot as plt
 from PIL import Image
-from skimage.transform import hough_line, hough_line_peaks
+from skimage.transform import probabilistic_hough_line
 
 base_uri = r'/Users/miguelperezsanchis/Downloads/hackMIT/png_maps'
 img_path = os.path.join(base_uri, '1_0.png')
@@ -16,24 +16,25 @@ pix = (pix < 0.5).astype(int)
 
 print(pix.shape)
 
-out, angles, d = hough_line(pix, theta=np.linspace(start=-np.pi/2., stop=np.pi/2., num=13))
+lines_xy = probabilistic_hough_line(pix, theta=np.linspace(start=-np.pi/2., stop=np.pi/2., num=13))
 
-out, angles, d = hough_line_peaks(out, angles, d)
+print(lines_xy)
 
-print(angles)
-print(d)
+lines_xy_flat = []
+for line in lines_xy:
+    lines_xy_flat += line
+    lines_xy_flat.append(None)
 
-# fig, ax = plt.subplots()
-# ax.set_title("Floor 1 of bldg 1", size=20)
-#
-#
-# scatter = ax.imshow(pix, origin='lower')
-# tooltip = mpld3.plugins.PointHTMLTooltip(scatter, labels=titles)
-# mpld3.plugins.connect(fig, tooltip)
+fix, axes = plt.subplots(1, 2)
 
-plt.imshow(
-    out
-)
+axes[0].imshow(img, cmap=plt.cm.gray)
+axes[0].set_title('Input image')
+
+axes[1].plot(lines_xy_flat)
+axes[1].set_title('Hough transform')
+axes[1].set_xlabel('Angle (degree)')
+axes[1].set_ylabel('Distance (pixel)')
+
 plt.tight_layout()
 mpld3.show(open_browser=False, ip='0.0.0.0', port=8000)
 
