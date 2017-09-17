@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <h1>MIT Maps</h1>
+    <h2>From...</h2>
+    <form action="." method="POST">
+        <input type="text" name="from">
+    </form>
+	<h2>To...</h2>
+    <form action="." method="POST">
+        <input type="text" name="to">
+        <input type="submit" name="to" value="Send">
+    </form>
+</body>
+</html>
