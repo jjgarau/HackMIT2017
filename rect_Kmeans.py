@@ -18,10 +18,10 @@ def get_orient_xy(thetas, dists):
 # rects_td is tuple of thetas, dist
 # def find_best_Kmeans(rects_td, max_coords):
 #     verts, horizs = get_orient_xy(rects_td)
-#     best_kmeans
+#     best_kmeans = [], [], [], [], np.inf, np.inf
 #     for i in range(3):
 #         for j in range(3):
-
+#             clusters_v, clusters_h, xs, ys, dist_v, dist_h
 
 
 def Kmeans(vert_rects, horiz_rects, n_vert, n_horiz, max_coords, niter=10, ntimes=10):
@@ -34,42 +34,63 @@ def Kmeans(vert_rects, horiz_rects, n_vert, n_horiz, max_coords, niter=10, ntime
         xs = np.random.uniform(low=0, high=max_coords[0], size=n_vert)
         ys = np.random.uniform(low=0, high=max_coords[1], size=n_horiz)
 
+        print(xs.shape)
+        print(ys.shape)
+
         dist_v = 0.0
         dist_h = 0.0
-        clusters_h = np.zeros(shape=(len(horiz_rects), 2)) # asign each point to a cluster
-        clusters_v = np.zeros(shape=(len(vert_rects), 2))
-        for iter in niter:
+        clusters_h = [0] * horiz_rects # asign each point to a cluster
+        dist_clust_h = np.array([np.inf] * len(horiz_rects))
+        clusters_v = [0] * vert_rects
+        dist_clust_v = np.array([np.inf] * len(vert_rects))
+
+        for k in range(niter):
             # maximization
             for i, x in enumerate(xs):
-                d = vert_rects - x
-                clusters_v[d < clusters_v[:,1], :] = [i, d]
-            dist_v += np.sum(clusters_v[:,1] * clusters_v[:,1])
+                d = np.abs(vert_rects - x)
+                print(d)
+                for j in range(len(d)):
+                    if d[j] < dist_clust_v[j]:
+                        print(d[j], dist_clust_v[j])
+                        clusters_v[j] = i
+                        dist_clust_v[j] = d[j]
+            dist_v += np.sum(dist_clust_v * dist_clust_v)
 
             for i, y in enumerate(ys):
                 d = horiz_rects - y
-                clusters_h[d < clusters_h[:,1], :] = [i, d]
-            dist_h += np.sum(clusters_h[:,1] * clusters_h[:,1])
+                for j in range(len(d)):
+                    if d[j] < dist_clust_h[j]:
+                        clusters_h[j] = i
+                        dist_clust_h[j] = d[j]
+            dist_h += np.sum(dist_clust_h * dist_clust_h)
 
+            print(clusters_v)
+            print(clusters_h)
             # expectation
-            xs = np.mean(vert_rects[clusters_v[:,0] == xs])
-            ys = np.mean(horiz_rects[clusters_h[:,0] == ys])
+            for clust in clusters_v:
+                xs[clust] = np.mean(vert_rects[clusters_v == clust])
+            for clust in clusters_h:
+                ys[clust] = np.mean(horiz_rects[clusters_h == clust])
 
-        key_v = tuple(clusters_v[:,0])
-        key_h = tuple(clusters_h[:,0])
+        key_v = tuple(clusters_v)
+        key_h = tuple(clusters_h)
 
         if not key_v in clusters_vs:
             clusters_vs[key_v] = (1, xs, dist_v)
         elif dist_v < clusters_vs[key_v][2]:
             clusters_vs[key_v] = (clusters_vs[key_v][0]+1, xs, dist_v)
         else:
-            clusters_vs[key_v][0] += 1
+            clusters_vs[key_v] = (clusters_vs[key_v][0]+1, clusters_vs[key_v][1], clusters_vs[key_v][2])
 
         if not key_h in clusters_hs:
             clusters_hs[key_h] = (1, ys, dist_h)
         elif dist_h < clusters_hs[key_h][2]:
             clusters_hs[key_h] = (clusters_hs[key_h][0]+1, ys, dist_h)
         else:
-            clusters_hs[key_h][0] += 1
+            clusters_vs[key_h] = (clusters_hs[key_h][0] + 1, clusters_hs[key_h][1], clusters_hs[key_h][2])
+
+    print(clusters_vs)
+    print(clusters_hs)
 
     clusters_v, n_max, xs, dist_v = [], 0, [], 0.0
     for cluster, (n, x, d) in clusters_vs.items():
