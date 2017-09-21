@@ -5,8 +5,6 @@ def dot_Kmeans(verts, horizs, nodes, max_coords, niter=10, ntimes=10):
     clusters_hs = {}
     clusters_vs = {}
 
-    nodes = np.flip(nodes, axis=1)
-
     print('NODEEES', nodes)
 
     for exec in range(ntimes):
@@ -24,6 +22,7 @@ def dot_Kmeans(verts, horizs, nodes, max_coords, niter=10, ntimes=10):
         dist_clust_v = np.array([np.inf] * len(nodes))
 
         for k in range(niter):
+
             # maximization
             for i, x in enumerate(xs):
                 d = nodes - np.array([x, horizs[i]])
@@ -34,7 +33,7 @@ def dot_Kmeans(verts, horizs, nodes, max_coords, niter=10, ntimes=10):
                         print(d[j], dist_clust_h[j])
                         clusters_h[j] = i
                         dist_clust_h[j] = d[j]
-                dist_h += np.sum(d)
+            dist_h = np.sum(dist_clust_h)
 
             for i, y in enumerate(ys):
                 d = nodes - np.array([verts[i], y])
@@ -44,7 +43,7 @@ def dot_Kmeans(verts, horizs, nodes, max_coords, niter=10, ntimes=10):
                         print(d[j], dist_clust_v[j])
                         clusters_v[j] = i
                         dist_clust_v[j] = d[j]
-                dist_v += np.sum(d)
+            dist_v = np.sum(dist_clust_v)
 
             # expectation
             for clust in range(len(clusters_h)):
@@ -91,6 +90,4 @@ def dot_Kmeans(verts, horizs, nodes, max_coords, niter=10, ntimes=10):
             ys = y
             dist_v = d
 
-
-
-        return clusters_v, clusters_h, xs, ys, dist_v, dist_h
+    return clusters_v, clusters_h, xs, ys, dist_v + dist_h

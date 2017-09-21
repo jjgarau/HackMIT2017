@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -10,17 +11,29 @@ from skimage.morphology import dilation, opening
 from skimage.measure import regionprops
 from sklearn.cluster import KMeans
 
+def save(obj, fpath):
+    with open(fpath, 'wb') as f:
+        pickle.dump(obj, f)
+
+def load(fpath):
+    with open(fpath, 'rb') as f:
+        obj = pickle.load(f)
+    return obj
 
 class NodeSet():
 
-    def __init__(self, file, nodes=True, n_ext=None):
+    def __init__(self, file, nodes=True, n_ext=None, filepath=None):
         self.map_ = self.get_map(file)
         if nodes:
             self.p_nodes = self.get_pnodes()
             self.nodes = self.get_nodes()
+            save(self.nodes, filepath)
         else:
-            self.p_nodes = None
-            self.nodes = n_ext
+            if filepath:
+                self.nodes = load(filepath)
+            else:
+                self.p_nodes = None
+                self.nodes = n_ext
 
     def get_map(self, file):
         img = Image.open(file).convert('L')

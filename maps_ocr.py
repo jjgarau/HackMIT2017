@@ -10,22 +10,21 @@ from skimage.transform import hough_line, hough_line_peaks
 from nodes import NodeSet
 
 from rect_Kmeans import *
-from dot_Kmeans import *
+from dot_Kmeans_v3 import *
+from utils import *
 
-base_uri = r'/Users/miguelperezsanchis/Downloads/hackMIT/png_maps'
-img_path = os.path.join(base_uri, '1_0.png')
-node_path = os.path.join(base_uri, '1_0_nodes.pickle')
+fname = '1_1'
 
-img = Image.open(img_path).convert('L')
+base_uri = r'/Users/miguelperezsanchis/Downloads/hackMIT'
+img_path = os.path.join(base_uri, 'png_maps', fname + '.png')
+node_path = os.path.join(base_uri, 'nodes_maps', fname +'_nodes.pickle')
+graph_path = os.path.join(base_uri, 'graph_maps', fname + '.json')
 
-pix = np.array(img) * 1. / 255.
 
-# pix = f.canny(pix)
+nodeset = NodeSet(img_path, nodes=False, filepath=node_path)
 
-nodeset = NodeSet(img_path, filepath=node_path)
-
+nodes_coords = np.flip(nodeset.nodes, axis=1)  # now is (x,y)
 pix = nodeset.map_
-print(nodeset.nodes.shape)
 
 for _ in range(20):
     pix = morph.binary_dilation(pix)
@@ -36,7 +35,7 @@ h, theta, d = hough_line(pix, theta=np.linspace(start=-np.pi/2., stop=np.pi/2, n
 
 print(h.shape, theta.shape, d.shape)
 
-h, angles, dists = hough_line_peaks(h, theta, d, min_distance=20, num_peaks=12, threshold=0.5*h.max())
+h, angles, dists = hough_line_peaks(h, theta, d, min_distance=20, num_peaks=12, threshold=0.3*h.max())
 
 clust_v, clust_h, xs, ys, cost = find_best_Kmeans(angles, dists, pix.shape)
 
@@ -47,47 +46,66 @@ print(xs)
 print(ys)
 print(cost)
 
-corners = [(y, x) for y in clust_h for x in clust_v]
-
-clust_dv, clust_dh, dxs, dys, dcost_v, dcost_h = dot_Kmeans(xs, ys, nodeset.nodes, pix.shape)
+node2cluster, cluster_coords, dcost = dot_Kmeans(xs, ys, nodes_coords, pix.shape, niter=5, ntimes=50)
 
 print('KMEANS_DOT')
-print(clust_dv)
-print(clust_dh)
-print(dxs)
-print(dys)
-print(dcost_v)
-print(dcost_h)
+print(node2cluster)
+print(cluster_coords)
+print(dcost)
 
-dots_in_lines = list(zip(xs, dys)) + list(zip(dxs, ys))
+corners = [(x, y) for x in xs for y in ys]
+print('CORNERS\n', corners)
 
+dots_in_lines = np.array(cluster_coords + corners)  # coordinates of important nodes
 
+print('DOTS IN LINES\n', len(dots_in_lines))
+print(dots_in_lines)
 
+g_important = build_graph_from_edges(find_edges(dots_in_lines), len(dots_in_lines))
+
+print('[')
+for l in g_important:
+    print('\t', l)
+print(']')
+
+g_whole = build_whole_graph(nodes_coords, node2cluster, g_important)
+
+graph_coords = np.concatenate((dots_in_lines, nodes_coords))
+
+graph = {'name': fname, 'coords': graph_coords, 'struc': g_whole}
+save_json(graph, graph_path)
 
 fig, ax = plt.subplots()
 
+# plot hough lines result
 for _, angle, dist in zip(h, angles, dists):
     y0 = (dist - 0 * np.cos(angle)) / (np.sin(angle) + 0.0001)
-    y1 = (dist - pix.shape[1] * np.cos(angle)) / (np.sin(angle) + 0.001)
+    y1 = (dist - pix.shape[1] * np.cos(angle)) / (np.sin(angle) + 0.0001)
     ax.plot((0, pix.shape[1]), (y0, y1), '-r')
 
+# plot rects kmeans result
 for x in xs:
     ax.plot((x, x), (0, pix.shape[0]), '-b')
 for y in ys:
     ax.plot((0, pix.shape[1]), (y,y), '-b')
 
-nods = np.array(nodeset.nodes)
-ax.plot(nods[:,1], nods[:,0], 'ro')
+# plot nodes found by clustering
+ax.plot(nodes_coords[:,0], nodes_coords[:,1], 'ro')
 
-for (x, dy) in zip(xs, dys):
-    ax.plot(x,dy, 'g^')
-for (dx, y) in zip(dxs, ys):
-    ax.plot(dx,y, 'g^')
+# plot corridors nodes found by dotsKmeans
+for (x, y) in cluster_coords:
+    ax.plot(x,y, 'g^')
+
+# plot whole gragh
+for i, (x, y) in enumerate(graph_coords):
+    plotted = []
+    for j in g_whole[i]:
+        xj, yj = graph_coords[j]
+        ax.plot((x, xj), (y, yj), '--y')
 
 ax.set_xlim((0, pix.shape[1]))
 ax.set_ylim((pix.shape[0], 0))
 ax.set_axis_off()
-ax.set_title('Detected lines')
 ax.imshow(pix, cmap=plt.cm.gray)
 ax.set_title('Input image')
 
